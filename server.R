@@ -16,19 +16,22 @@ dune.df<-round(as.matrix(dune.dist),2)
 
 shinyServer(function(input,output){
 
-  values<-reactiveValues(sxsp=dune.df)
+  values<-reactiveValues(dist.df=dune.df)
 
   observeEvent(input$runit,{
     if(is.null(input$getcsv)) {
       values$sxsp<-as.data.frame(dune)
     } else{
       inFile<-input$getcsv
-      temp.df<-read.csv(inFile$datapath)##needs to sites x species matrix, with 1st col as grouping var
-      temp.df[is.na(temp.df)]<-0
-      values$sxsp<-as.data.frame(temp.df)
+      temp.df<-read.csv(inFile$datapath)
+      temp2<-temp.df[sapply(temp.df,isnumeric)]
+      temp2[is.na(temp2)]<-0
+      values$sxsp<-temp2
     }
-    
-    if (input$distin == "Bray-Curtis"){
+  })
+  
+  observeEvent(input$runit,{
+    if (input$distin == "bray"){##why is this outputting only
       distmat<-vegdist(values$sxsp,method="bray")
       values$dist.df<-round(as.matrix(distmat))
     }else{

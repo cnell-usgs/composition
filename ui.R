@@ -32,7 +32,8 @@ body <- dashboardBody(
                          p("In the heatmap the columns and rows are the same, but hte values are visualized with a color scale that is not pictured. "),
                          p("Upload your won site x species matrix of communitymeasurements. Pressing 'Run' will re-run the heatmap visualization for the uploaded data and 
                            print the corresponding data in the table."),
-                         fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv"))
+                         fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv")),
+                         actionButton("runit","Update Matrix"),br()
                      )
               ),
               column(width=8,
@@ -91,11 +92,11 @@ body <- dashboardBody(
                            values mean this xxx"),
                          p("Bray-curtis"),
                          p("Jaccard"),
-                         selectInput("distin","Dissimilarity Index",choices=c("Bray-Curtis","Jaccard")),
+                         selectInput("distin","Dissimilarity Index",choices=c("Bray-Curtis"="bray","Jaccard")),
                          p("Data transformations may be necessary to normalize data and alleviate the effects of dominant species on your results. An alternative
                            approach is to convert species abundances to proportion data. Sqrt works. "),
                          selectInput("df.tr","Data transformation:",choices=c("None","square root","log","proportions"),selected="none"),
-                         actionButton("runit","Get distance matrix"),br(),
+                         actionButton("runit","Calculate"),br(),
                          p("Upload a community matrix. Pressing 'Run' will calculate a distance matrix for your community and visualize it in a heatmap."),
                          fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv"))
                      )
