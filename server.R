@@ -93,7 +93,7 @@ shinyServer(function(input,output){
   shorty.df<-cbind(Site,Plot,short.df)
   
   long<-shorty.df
-  long.df<-melt(long, id.vars=c("Site","Plot"),variable.name="Species",,na.rm=FALSE,value.name="Abundance")
+  long.df<-melt(long, id.vars=c("Site","Plot"),variable.name="Species",na.rm=FALSE,value.name="Abundance")
 
   output$short<-renderDataTable(
     shorty.df,extensions='FixedColumns',
@@ -107,13 +107,13 @@ shinyServer(function(input,output){
   )
   output$jaccard<-renderUI({
     withMathJax(
-      helpText("$$J(A,B) = \frac{\vertA\bigcapB\vert}{\vertA\bigcapB\vert$$")
+      helpText("$$J(A,B) =\\frac{ | A\\bigcup B |-|A\\bigcap B}{ | A\\bigcup B  |}$$")
   )
   })
   
   output$bray<-renderUI({
     withMathJax(
-      helpText("$$J(A,B) = \verA\bigcap$$")
+      helpText("$$BC_{ij} = 1-\\frac{2C_{ij}}{S_{i}+S_{j}}$$")
     )
   })
 
