@@ -33,6 +33,19 @@ shinyServer(function(input,output){
   })
   
   observeEvent(input$runit2,{
+    if(is.null(input$getcsv)) {
+      sxsp<-as.data.frame(dune)
+      values$sxsp<-sxsp
+    } else{
+      inFile<-input$getcsv
+      temp.df<-read.csv(inFile$datapath)
+      temp2<-temp.df[sapply(temp.df,is.numeric)]
+      temp2[is.na(temp2)]<-0
+      values$sxsp<-temp2
+    }
+  })
+  
+  observeEvent(input$runit2,{
     if (input$distin == "bray"){##why is this outputting only
       distmat<-vegdist(values$sxsp,method="bray")
       dist.m<-as.matrix(distmat)
@@ -62,18 +75,47 @@ shinyServer(function(input,output){
   
   output$dist.matrix<-renderDataTable(
     values$dist.df,extensions='FixedColumns',
-    options=list(pageLength=nrow(dune.df),dom='t',scrollX=TRUE,scrollY='400px',fixedColumns=list(leftColumns=1)),
+    options=list(pageLength=nrow(dune.df),dom='t',scrollX=TRUE,scrollY='300px',fixedColumns=list(leftColumns=1)),
     class="compact"
     
   )
   
   output$comm.matrix<-renderDataTable(
     values$sxsp,extensions='FixedColumns',
-    options=list(pageLength=nrow(values$sxsp),dom='t',scrollX=TRUE,scrollY='400px',fixedColumns=list(leftColumns=1)),
+    options=list(pageLength=nrow(values$sxsp),dom='t',scrollX=TRUE,scrollY='300px',fixedColumns=list(leftColumns=1)),
     class="compact"
     
   )
+  
+  short.df<-doon[,1:6]
+  Site<-rep(1:5, each=4)
+  Plot<-rep(1:4,5)
+  shorty.df<-cbind(Site,Plot,short.df)
+  
+  long<-shorty.df
+  long.df<-melt(long, id.vars=c("Site","Plot"),variable.name="Species",,na.rm=FALSE,value.name="Abundance")
 
+  output$short<-renderDataTable(
+    shorty.df,extensions='FixedColumns',
+    options=list(pageLength=nrow(shorty.df),dom='t',scrollX=TRUE,scrollY='350px',fixedColumns=list(leftColumns=1)),
+    class="compact"
+  )
+  output$long<-renderDataTable(
+    long.df,extensions='FixedColumns',
+    options=list(pageLength=nrow(long.df),dom='t',scrollX=TRUE,scrollY='350px',fixedColumns=list(leftColumns=1)),
+    class="compact"
+  )
+  output$jaccard<-renderUI({
+    withMathJax(
+      helpText("$$J(A,B) = \frac{\vertA\bigcapB\vert}{\vertA\bigcapB\vert$$")
+  )
+  })
+  
+  output$bray<-renderUI({
+    withMathJax(
+      helpText("$$J(A,B) = \verA\bigcap$$")
+    )
+  })
 
 
 })
