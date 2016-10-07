@@ -20,6 +20,8 @@ body <- dashboardBody(
                      box(title=tags$b("What is a site x species community matrix?"), width=NULL,collapsible = TRUE,status="primary",
                          p("Sites are ROWS"),
                          p("Species abundances or absence/presence data in the COLUMNS"),
+                         p("This is the basis for species composition analyses. This is also an efficient format for dataset with many variables or when you have replicated data/nested design."),
+                         
                          p("These can be transposed in some situation, but in general there is a column for each species and rows are sites/plots or the observations 
                            taken of the species. This format is commonly used in many types of analyses and does not pertain exclusively to species abundance data.
                            This also has applications to chemical analyses, genetic analyses, and really anything you can measure many variables for.
@@ -32,7 +34,7 @@ body <- dashboardBody(
                          p("In the heatmap the columns and rows are the same, but hte values are visualized with a color scale that is not pictured. "),
                          p("Upload your won site x species matrix of communitymeasurements. Pressing 'Run' will re-run the heatmap visualization for the uploaded data and 
                            print the corresponding data in the table."),
-                         fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv")),
+                         fileInput("getcsv","Upload community matrix",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv")),
                          actionButton("runit","Update Matrix"),br()
                      )
               ),
@@ -49,7 +51,7 @@ body <- dashboardBody(
               column(width=6,
                      box(title=tags$b("Learn More"),width=NULL,
                          p("Magurran, A. E. 1988. Ecological Diversity and its Measurement. Princeton University Press, Princeton, NJ."),
-                         p(""),
+                         p("Legendre P, Legendre L. Numerical Ecology. 2nd ed. Amsterdam: Elsevier, 1998. ISBN 978-0444892508."),
                          a("See pdf", href="web address",target="_blank"))),
               column(width=6,
                      box(title=tags$b("R packages"),width=NULL,
@@ -92,11 +94,11 @@ body <- dashboardBody(
                            values mean this xxx"),
                          p("Bray-curtis"),
                          p("Jaccard"),
-                         selectInput("distin","Dissimilarity Index",choices=c("Bray-Curtis"="bray","Jaccard")),
+                         selectInput("distin","Dissimilarity Index",choices=c("Bray-Curtis"="bray","Jaccard"="jacc")),
                          p("Data transformations may be necessary to normalize data and alleviate the effects of dominant species on your results. An alternative
                            approach is to convert species abundances to proportion data. Sqrt works. "),
                          selectInput("df.tr","Data transformation:",choices=c("None","square root","log","proportions"),selected="none"),
-                         actionButton("runit","Calculate"),br(),
+                         actionButton("runit2","Calculate"),br(),
                          p("Upload a community matrix. Pressing 'Run' will calculate a distance matrix for your community and visualize it in a heatmap."),
                          fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv"))
                      )
@@ -120,7 +122,7 @@ body <- dashboardBody(
                 p("In the field it is common to take data in the long format. It is not necessarily convenient or paper friendly to print out a species matrix for 
                   a large number of speices that may all be fairly rare, thus the page stay unused. "),
                 p("The following steps will transform your data from the long format to short format (community matrix) in R. Long format means that each line of your data 
-                  are an observation/value of a single species."),
+                  are an observation/value of a single species."),p("show a little examples of long and short data."),
                 p(tags$code("library(reshape2)")),
                 p(tags$code("long.data<-read.csv('filename.csv')")),
                 p(tags$code(""))
@@ -128,7 +130,7 @@ body <- dashboardBody(
 )))
 # Put them together into a dashboardPage
 dashboardPage(skin = "black",
-              dashboardHeader(title = "Measuring Diversity", titleWidth=250),
+              dashboardHeader(title = "Community Data", titleWidth=250),
               sidebar,
               body
 )

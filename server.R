@@ -16,27 +16,35 @@ dune.df<-round(as.matrix(dune.dist),2)
 
 shinyServer(function(input,output){
 
-  values<-reactiveValues(dist.df=dune.df)
+  values<-reactiveValues(dist.df=dune.df,
+                         sxsp=data.frame(dune))
 
   observeEvent(input$runit,{
     if(is.null(input$getcsv)) {
-      values$sxsp<-as.data.frame(dune)
+      sxsp<-as.data.frame(dune)
+      values$sxsp<-sxsp
     } else{
       inFile<-input$getcsv
       temp.df<-read.csv(inFile$datapath)
-      temp2<-temp.df[sapply(temp.df,isnumeric)]
+      temp2<-temp.df[sapply(temp.df,is.numeric)]
       temp2[is.na(temp2)]<-0
       values$sxsp<-temp2
     }
   })
   
-  observeEvent(input$runit,{
+  observeEvent(input$runit2,{
     if (input$distin == "bray"){##why is this outputting only
       distmat<-vegdist(values$sxsp,method="bray")
-      values$dist.df<-round(as.matrix(distmat))
-    }else{
+      dist.m<-as.matrix(distmat)
+      dist.round<-round(dist.m,2)
+      values$dist.df<-dist.round
+    } else if (input$distin == "jacc"){
       distmat<-vegdist(values$sxsp,method="jaccard")
-      values$dist.df<-round(as.matrix(distmat))
+      dist.m<-as.matrix(distmat)
+      dist.round<-round(dist.m,2)
+      values$dist.df<-dist.round
+    }else {
+      
     }
     
   })
@@ -44,12 +52,12 @@ shinyServer(function(input,output){
   
   output$heat<-renderD3heatmap({
 
-    he.ma<-d3heatmap(values$dist.df,scale="column",colors="RdYlBu",breaks=5,Rowv=FALSE,Colv=FALSE,dendrogram='none')
+    he.ma<-d3heatmap(values$dist.df,scale="column",colors="RdYlBu",breaks=7,Rowv=FALSE,Colv=FALSE,dendrogram='none')
     he.ma
   })
   
   output$comm.viz<-renderD3heatmap({
-    comm.heat<-d3heatmap(doon,scale="column",colors="Spectral",breaks=5,Rowv=FALSE,Colv=FALSE,dendrogram='none')
+    comm.heat<-d3heatmap(values$sxsp,scale="column",colors="OrRd",breaks=5,Rowv=FALSE,Colv=FALSE,dendrogram='none')
   })
   
   output$dist.matrix<-renderDataTable(
@@ -60,8 +68,8 @@ shinyServer(function(input,output){
   )
   
   output$comm.matrix<-renderDataTable(
-    doon.df,extensions='FixedColumns',
-    options=list(pageLength=nrow(doon.df),dom='t',scrollX=TRUE,scrollY='400px',fixedColumns=list(leftColumns=1)),
+    values$sxsp,extensions='FixedColumns',
+    options=list(pageLength=nrow(values$sxsp),dom='t',scrollX=TRUE,scrollY='400px',fixedColumns=list(leftColumns=1)),
     class="compact"
     
   )
