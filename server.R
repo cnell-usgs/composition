@@ -44,15 +44,30 @@ shinyServer(function(input,output){
       values$sxsp<-temp2
     }
   })
+  observeEvent(input$runit2,{
+    if(input$df.tr=="None"){
+      values$t.df<-values$sxsp
+    }else if (input$df.tr == "square root"){
+      df.sqrt<-sqrt(values$sxsp)
+      values$t.df<-df.sqrt
+    
+    }else if (input$df.tr == "proportions"){
+      values$t.df<-values$sxsp
+    }else{
+      values$t.df<-values$sxsp
+  }
+    
+  })
+
   
   observeEvent(input$runit2,{
     if (input$distin == "bray"){##why is this outputting only
-      distmat<-vegdist(values$sxsp,method="bray")
+      distmat<-vegdist(values$t.df,method="bray")
       dist.m<-as.matrix(distmat)
       dist.round<-round(dist.m,2)
       values$dist.df<-dist.round
     } else if (input$distin == "jacc"){
-      distmat<-vegdist(values$sxsp,method="jaccard")
+      distmat<-vegdist(values$t.df,method="jaccard")
       dist.m<-as.matrix(distmat)
       dist.round<-round(dist.m,2)
       values$dist.df<-dist.round
@@ -87,7 +102,7 @@ shinyServer(function(input,output){
     
   )
   
-  short.df<-doon[,1:6]
+  short.df<-doon
   Site<-rep(1:5, each=4)
   Plot<-rep(1:4,5)
   shorty.df<-cbind(Site,Plot,short.df)
@@ -97,12 +112,12 @@ shinyServer(function(input,output){
 
   output$short<-renderDataTable(
     shorty.df,extensions='FixedColumns',
-    options=list(pageLength=nrow(shorty.df),dom='t',scrollX=TRUE,scrollY='350px',fixedColumns=list(leftColumns=1)),
+    options=list(pageLength=nrow(shorty.df),dom='t',scrollX=TRUE,scrollY='300px',fixedColumns=list(leftColumns=1)),
     class="compact"
   )
   output$long<-renderDataTable(
     long.df,extensions='FixedColumns',
-    options=list(pageLength=nrow(long.df),dom='t',scrollX=TRUE,scrollY='350px',fixedColumns=list(leftColumns=1)),
+    options=list(pageLength=nrow(long.df),dom='t',scrollX=TRUE,scrollY='300px',fixedColumns=list(leftColumns=1)),
     class="compact"
   )
   output$jaccard<-renderUI({

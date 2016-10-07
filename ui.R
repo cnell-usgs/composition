@@ -3,9 +3,9 @@ library(d3heatmap)
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Community Matrix",tabName="topic",icon=icon("calculator",lib="font-awesome")),
-    menuItem("Distance Matrix",tabName="dist",icon=icon("twitter", lib="font-awesome")),
-    menuItem("Data Wrangling",tabName="howto"),
+    menuItem("Community Matrix",tabName="topic",icon=icon("stats",lib="glyphicon")),
+    menuItem("Distance Matrix",tabName="dist",icon=icon("calculator", lib="font-awesome")),
+    menuItem("Data Wrangling",tabName="howto",icon=icon("list",lib="glyphicon")),
     menuItem("Learn More",tabName="lit",icon=icon("book", lib="glyphicon")),
     br()
     
@@ -30,9 +30,9 @@ body <- dashboardBody(
                            rows indicate sites and the columns are the abundances of species found in the sites. 
                            of the abundance values for the species measured in the 'dune' dataset in R."),
                          p("A heatmap is useful to display many variables at one time."),
-                         p("Upload a community data matrix. Pressing 'Update Matrix' will update the heatmap and table to display the provided data. The default data are from the 'dune' dataset in R."),
+                         p("Upload a community data matrix. Pressing 'Update Matrix' will update the heatmap and table to display the provided data. The default data are from the 'dune' dataset in R."),br(),
                          fileInput("getcsv","Upload Community Matrix",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv")),
-                         actionButton("runit","Update Matrix"),br()
+                         actionButton("runit","Update Matrix"),br(),br()
                      )
               ),
               column(width=8,
@@ -41,7 +41,6 @@ body <- dashboardBody(
                      box(title=tags$b("Data Matrix"), width=NULL,
                          dataTableOutput("comm.matrix"))
               )
-            
     )),
     tabItem(tabName="lit",
             fluidRow(
@@ -58,20 +57,27 @@ body <- dashboardBody(
                          h4("heatmaply"),
                          h4("phyloseq"),
                          h4("vegan"),
-                         
                          p("description."),
-                         a("Documentation",href="docadd",target="_blank")),
+                         h4(tags$b("Data Wrangling in R:")),
+                         h4("reshape2"),
+                         p("Flexibility in data shapes"),
+                         a("An introduction to reshape2", href="http://seananderson.ca/2013/10/19/reshape.html",target="_blank"),
+                         a("Documentation", href="https://cran.r-project.org/web/packages/reshape2/reshape2.pdf",target="_blank"),br(),br(),
+                         h4("tidyr"),
+                         p("Cleaning data easily and effectively"),
+                         a("An introduction tidy data", href="https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html",target="_blank"),br(),
+                         a("Documentation", href="https://cran.r-project.org/web/packages/tidyr/tidyr.pdf",target="_blank")),
                      box(title=tags$b("This app"), solidHeader=TRUE,status="warning",width=NULL,
                          p("This app was made by",a("Colleen Nell",href="www.collnell.com",target="_blank"),"with support from the", a("UCI Data Science Initiative summer fellowship (2016)",
                                                                                                                 href="http://datascience.uci.edu/2016/06/27/2016-data-science-summer-fellow/",target="_blank")),
-                         p(tags$b("Get R script for these analyses:")),br(),
-                         a(href="",target="_blank"),br(),
+                         p(tags$b("Get R script for these analyses:")),
+                         a("Community Data Strucutures in R",href="",target="_blank"),br(),
                          p("If you are new to R, check out this",a("Intro to R cookbook for Ecologists",href="http://rpubs.com/mooneyk/213152",target="_blank")),
                          a("See code for application",href="githublink",target="_blank")
                          )
                      )
             )
-    ),
+    )),
     
     tabItem(tabName="dist",
             fluidRow(
@@ -91,45 +97,62 @@ body <- dashboardBody(
                          column(width=3,br(),
                                 actionButton("runit2","Calculate"),br()),
                          column(width=9,
-                                fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv")))),
-                     box(title="Transforming Data",width=NULL,
+                                fileInput("getcsv","Upload data",multiple=FALSE,accept=c("text/csv","text/comma-separated-values,text/plain",".csv"))),
+                         p("Distance matrices can be constructed in R using the 'vegdist' function in the 'vegan' package. 'See code' for a walkthrough in R.")
+                         ),
+                     box(title="Data Transformation",width=NULL,
+                         selectInput("df.tr","Select method and press 'Calculate'",choices=c("None","square root","proportions"),selected="None"),
                          p("Data transformations may be necessary to normalize data. Transformed variables should still represent the data, but will be more amenable 
-                           to analysis or comparison. Often species data are converted to relative abundances (proportions)."),
-                         selectInput("df.tr","Data transformation:",choices=c("None","square root","log","proportions"),selected="none"),
+                           to analysis or comparison. Often species data are converted to relative abundances (proportions) to minimize the influence of highly dominant species.")
                          )
-                   
             ),
             column(width=7,
               box(title = tags$b("Visualizing the Distance Matrix"),width=NULL,status="primary",
                   d3heatmapOutput("heat")),
               box(title=tags$b("Distance Matrix"),width=NULL,
                   dataTableOutput("dist.matrix"))
-                    
-                     
             )
     )
-    
-    
+
   ),
   tabItem(tabName="howto",
           fluidRow(
             column(width=6,
               box(title=tags$b("Converting data structure to site x species matrix"), width = NULL,
                   p(""),
-                  p("The following steps will transform your data from long form to short form(site x species community matrix) in R. Long format means that each line of your data 
-                    are an observation/value of a single species."),p("show a little examples of long and short data."),
+                  p("The following steps will transform your data from long format to short form using R. Long format means that each line of your data 
+                    are an observation/value of a single species."),
+                  p(tags$b("Convert long data to short format:")),
+                  p("Read in data:"),
                   p(tags$code("library(reshape2)")),
                   p(tags$code("long.data<-read.csv('filename.csv')")),
-                  p(tags$code("")))),
+                  p("Use 'reshape2' to cast your dataframe:"),
+                  p(tags$code("short.data<-dcast(long.data,Site+Plot~Species,value='Abundance')")),
+                  p("Convert 'NA's to 0's"),
+                  p(tags$code("short.data[is.na(short.data)] <- 0")),
+                  p(tags$code("str(short.data)")),
+                  p("Now columns should exist for each species"),
+                  p("Sometimes a file will be transposed so rows are species and columns are sites. To transpose this to a site x species matrix:"),
+                  p(tags$code("t.short<-t(short.data)")),br(),
+                  p(tags$b("Convert short data to long format")),
+                  p(tags$code("long.data <- melt(short.data, id.vars = c('Site','Plot'), variable.name = 'Species', value.name = 'Abundance'")),br(),br(),
+                  p(tags$b("Get R script for analyses in this app:")),
+                  a("Community Data Strucutures in R",href="",target="_blank"),br(),br(),
+                  p(("Resources for using 'reshape2' in R:"),
+                  a("An introduction to reshape2", href="http://seananderson.ca/2013/10/19/reshape.html",target="_blank"),
+                  a("Documentation", href="https://cran.r-project.org/web/packages/reshape2/reshape2.pdf",target="_blank"),br(),br(),
+                  p("The 'tidyr' package in R can also accomplish the same tasks. Learn about 'tidyr':"),
+                  a("An introduction tidy data", href="https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html",target="_blank"),
+                  a("Documentation", href="https://cran.r-project.org/web/packages/tidyr/tidyr.pdf",target="_blank")
+                  )),
             column(width=6,
-                   box(title="Short data",width=NULL,
+                   box(title=tags$b("Start: Long data"),width = NULL,
+                       p("Each observation on its' own line."),
+                       dataTableOutput("long",width="85%")),
+                   box(title=tags$b("End: Short data"),width=NULL,
                        p("Site x Species matrix:"),
-                       dataTableOutput("short",width="75%")),
-                   box(title="Long data",width = NULL,
-                       p(""),
-                       dataTableOutput("long",width="50%")))
-              
-                  
+                       dataTableOutput("short",width="85%"))
+                   )
           ))
 ))
 # Put them together into a dashboardPage
